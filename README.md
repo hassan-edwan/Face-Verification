@@ -20,7 +20,8 @@ pip install -r requirements.txt
 python scripts/ingest_lfw.py
 
 #generate pairs
-python scripts/generate_pairs.py
+python scripts/make_pairs.py
 
 #run similarity benchmark
 python -m scripts.bench_similarity
+
