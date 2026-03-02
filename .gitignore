@@ -1,0 +1,32 @@
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+bin/
+lib/
+include/
+
+# --- Python Artifacts ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# --- Data and Large Files ---
+data/
+/tensorflow_datasets/
+*.tar.gz
+*.zip
+*.pickle
+
+# --- Outputs & Logs ---
+/outputs/ 
+
+# --- OS and IDE specific ---
+.DS_Store
+.vscode/
+.idea/
+.ipynb_checkpoints/
+
+# --- Environment Secrets ---
+.env
