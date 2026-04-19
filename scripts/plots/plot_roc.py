@@ -13,19 +13,15 @@ Usage:
 """
 
 import os
+import glob
 import json
 import matplotlib.pyplot as plt
 
 # ── CONFIG ───────────────────────────────────────────────────────────────────
+# Auto-discover every run_*.json artifact — keeps new runs plotting without
+# maintaining a hardcoded list (prior list went stale on each new run).
 RUNS_DIR  = "outputs/runs"
 OUT_DIR   = "outputs/plots"
-RUN_FILES = [
-    "run_001.json",
-    "run_002.json",
-    "run_003.json",
-    "run_004.json",
-    "run_005.json",
-]
 # ─────────────────────────────────────────────────────────────────────────────
 
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -76,16 +72,16 @@ def plot_run(json_path: str, out_path: str):
     plt.tight_layout()
     plt.savefig(out_path, dpi=300)
     plt.close()
-    print(f"  Saved → {out_path}")
+    print(f"  Saved -> {out_path}")
 
 
 def plot_all_runs():
-    for filename in RUN_FILES:
-        json_path = os.path.join(RUNS_DIR, filename)
-        if not os.path.exists(json_path):
-            print(f"  Skipping {filename} — file not found")
-            continue
-        run_label = filename.replace(".json", "")
+    json_paths = sorted(glob.glob(os.path.join(RUNS_DIR, "run_*.json")))
+    if not json_paths:
+        print(f"  No run_*.json under {RUNS_DIR}/")
+        return
+    for json_path in json_paths:
+        run_label = os.path.splitext(os.path.basename(json_path))[0]
         out_path  = os.path.join(OUT_DIR, f"{run_label}_analysis.png")
         plot_run(json_path, out_path)
 

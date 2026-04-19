@@ -13,21 +13,16 @@ Usage:
 """
 
 import os
+import glob
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ── CONFIG ───────────────────────────────────────────────────────────────────
+# Auto-discover every run_*.json artifact (see plot_roc.py for rationale).
 RUNS_DIR  = "outputs/runs"
 OUT_DIR   = "outputs/plots"
-RUN_FILES = [
-    "run_001.json",
-    "run_002.json",
-    "run_003.json",
-    "run_004.json",
-    "run_005.json",
-]
 # ─────────────────────────────────────────────────────────────────────────────
 
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -68,16 +63,16 @@ def plot_confusion_matrix(json_path: str, out_path: str):
     plt.tight_layout(rect=[0, 0.07, 1, 1])
     plt.savefig(out_path, dpi=300)
     plt.close()
-    print(f"  Saved → {out_path}")
+    print(f"  Saved -> {out_path}")
 
 
 def plot_all_runs():
-    for filename in RUN_FILES:
-        json_path = os.path.join(RUNS_DIR, filename)
-        if not os.path.exists(json_path):
-            print(f"  Skipping {filename} — file not found")
-            continue
-        run_label = filename.replace(".json", "")
+    json_paths = sorted(glob.glob(os.path.join(RUNS_DIR, "run_*.json")))
+    if not json_paths:
+        print(f"  No run_*.json under {RUNS_DIR}/")
+        return
+    for json_path in json_paths:
+        run_label = os.path.splitext(os.path.basename(json_path))[0]
         out_path  = os.path.join(OUT_DIR, f"{run_label}_confusion_matrix.png")
         plot_confusion_matrix(json_path, out_path)
 
