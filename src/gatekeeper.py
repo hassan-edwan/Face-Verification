@@ -19,9 +19,16 @@ from enum import Enum, auto
 
 
 # ── TUNABLE THRESHOLDS ────────────────────────────────────────────────────────
-MATCH_THRESHOLD             = 0.70   # cosine sim >= this  → strict match (cross-track dedup, cache writes)
-REMATCH_THRESHOLD           = 0.60   # cosine sim >= this  → first-contact re-match against enrolled bank
-ENROLL_THRESHOLD            = 0.40   # cosine sim <  this  → new identity
+# Calibrated for the ArcFace (buffalo_l / w600k_r50) embedder in
+# src/embedder.py. ArcFace produces much tighter same-identity clusters
+# than FaceNet (typical same-id cosine 0.30-0.60 on LFW/IJB; different-id
+# 0.05-0.20). FaceNet values (0.70 / 0.60 / 0.40) would reject every
+# real match. When reverting via FACE_EMBEDDER=facenet, threshold sweep
+# on the fallback path before trusting these numbers.
+MATCH_THRESHOLD             = 0.40   # cosine sim >= this  → strict unconditional match
+REMATCH_THRESHOLD           = 0.20   # cosine sim >= this + rank-1 margin ≥ MIN_MATCH_MARGIN → re-acquisition match (tail genuines)
+ENROLL_THRESHOLD            = 0.20   # cosine sim <  this  → new identity
+MIN_MATCH_MARGIN            = 0.05   # run_019: required rank-1 minus rank-2 cosine gap when score sits in [REMATCH, MATCH). Decouples re-acquisition (wants loose REMATCH) from dedup (wants strict): at score=0.25 we still MATCH if rank-1 clearly wins, but refuse the match when a near-tie could merge two distinct identities.
 CONSENSUS_FRAMES            = 5      # frames before REFINED (was 7; 5 gives faster enrollment)
 MAX_EMBEDDINGS_PER_IDENTITY = 8      # embedding bank cap per person (was 15; 8 halves match cost)
 BUFFER_MAX_AGE              = 10.0   # seconds before pending candidate expires (was 30; faster cleanup)
@@ -126,11 +133,51 @@ class Gatekeeper:
         self._cleanup_expired()
 
         # ── Guard 1: TRACKING LOCK — fully enrolled tracks ───────────────────
-        # After first assignment, ALWAYS reuse the cached identity.
-        # Never re-run similarity search → prevents flickering on occlusion/angles.
+        # After first assignment the cached identity is normally reused
+        # without re-matching (prevents flickering on pose / occlusion /
+        # lighting drift). Run_021 adds a drift-break: if the incoming
+        # embedding is too dissimilar from the locked identity's bank
+        # AND another identity is a clearer match, the tracker has
+        # likely swapped face-assignments (crowded-scene S3 failure
+        # mode) — break the lock and re-lock to whoever the embedder
+        # now thinks this is. Drift-break must fire BEFORE
+        # `_try_update_embeddings` or a wrong-identity frame would
+        # silently pollute the correct identity's bank.
         if track_id in self._enrolled_tracks:
             name = self._tracker_identity_map.get(track_id)
             if name and name in self._known_faces:
+                bank_rows = self._known_faces[name]
+                cos_self = self._max_cosine_against_bank(embedding, bank_rows)
+                if cos_self < REMATCH_THRESHOLD:
+                    best_name, best_score, best_margin = \
+                        self._find_best_match_with_margin(embedding)
+                    is_strict  = best_score >= MATCH_THRESHOLD
+                    is_reacq   = (best_score >= REMATCH_THRESHOLD
+                                  and best_margin >= MIN_MATCH_MARGIN)
+                    if (best_name is not None and best_name != name
+                            and (is_strict or is_reacq)):
+                        # Tracker swap confirmed — re-lock and update the
+                        # new identity's bank instead of the old one's.
+                        self._tracker_identity_map[track_id] = best_name
+                        self._update_metadata(best_name, track_id)
+                        self._try_update_embeddings(best_name, embedding,
+                                                    quality_score)
+                        n = len(self._known_faces.get(best_name, []))
+                        print(f"[Gatekeeper] Track {track_id} drift-break: "
+                              f"'{name}' → '{best_name}' "
+                              f"(cos_self={cos_self:.2f}, "
+                              f"cos_new={best_score:.2f})")
+                        return GatekeeperResult(GatekeeperDecision.MATCHED,
+                                                best_name, best_score,
+                                                n, quality_score)
+                    # Drift without a clear alternative — hold the lock
+                    # but skip the bank update so we don't pollute with
+                    # a low-confidence embedding.
+                    self._update_metadata(name, track_id)
+                    return GatekeeperResult(GatekeeperDecision.MATCHED,
+                                            name, cos_self,
+                                            len(bank_rows), quality_score)
+                # Normal path: embedding confirms the lock.
                 self._update_metadata(name, track_id)
                 self._try_update_embeddings(name, embedding, quality_score)
                 n = len(self._known_faces[name])
@@ -144,15 +191,33 @@ class Gatekeeper:
             return self._refine(track_id, embedding, face_bgr, quality_score)
 
         # ── First contact: run full decision pipeline (once per new track_id) ─
-        # A returning person whose cosine sits in the 0.60–0.70 band used to
-        # land in UNCERTAIN (no-op); re-acquisition then repeatedly failed.
-        # First-contact now uses REMATCH_THRESHOLD so the same identity can
-        # re-lock across re-entry / pose / lighting change. Cross-track dedup
-        # (_matches_another_candidate) still uses MATCH_THRESHOLD — keeping
-        # the false-merge floor strict for two-unknowns-standing-near-each-other.
-        name, score = self._find_best_match(embedding)
+        # The match decision has to serve two different situations with one
+        # call site:
+        #   (a) Cross-track dedup at enrollment — "is this a duplicate of
+        #       someone already in the bank?" — wants strict threshold, else
+        #       distinct subjects whose mugshots happen to score ~0.25
+        #       against each other get merged (run_017 measured 46/130 = 35%
+        #       collision rate at REMATCH=0.20).
+        #   (b) Re-acquisition of a lost track — "did this new track_id
+        #       return the same walker?" — wants loose threshold to admit
+        #       pose/distance-drifted tail genuines (d1_far SCface queries
+        #       often sit at cosine 0.20–0.35 against their own bank entry).
+        #
+        # Run_019 splits them with a rank-1-vs-rank-2 margin check:
+        #   - score ≥ MATCH_THRESHOLD              → unconditional MATCH
+        #   - score ≥ REMATCH_THRESHOLD AND margin
+        #     ≥ MIN_MATCH_MARGIN                   → re-acquisition MATCH
+        #     (high score or clear rank-1 winner means the embedder is
+        #     confident this is the same person; ambiguous near-ties are
+        #     refused to avoid collision merges).
+        #   - otherwise                            → UNCERTAIN / accumulate.
+        name, score, margin = self._find_best_match_with_margin(embedding)
 
-        if score >= REMATCH_THRESHOLD:
+        is_strict_match    = score >= MATCH_THRESHOLD
+        is_reacquisition   = (score >= REMATCH_THRESHOLD
+                              and margin >= MIN_MATCH_MARGIN)
+
+        if is_strict_match or is_reacquisition:
             # Known identity → lock track immediately, no refinement needed
             self._pending.pop(track_id, None)
             self._tracker_identity_map[track_id] = name
@@ -162,7 +227,12 @@ class Gatekeeper:
             n = len(self._known_faces.get(name, []))
             return GatekeeperResult(GatekeeperDecision.MATCHED, name, score, n, quality_score)
 
-        if ENROLL_THRESHOLD <= score < REMATCH_THRESHOLD:
+        if ENROLL_THRESHOLD <= score < MATCH_THRESHOLD:
+            # Ambiguous band: either below REMATCH, or above REMATCH but
+            # rank-1 / rank-2 cosines are too close to justify re-lock.
+            # Refusing the match protects against collision; live pipeline
+            # will continue to see the track and may eventually resolve via
+            # a higher-quality later frame.
             return GatekeeperResult(GatekeeperDecision.UNCERTAIN, None, score, 0, quality_score)
 
         # Unknown face → start accumulation buffer
@@ -443,6 +513,77 @@ class Gatekeeper:
                 self._recent_matches.pop()
 
         return best_name, best_score
+
+    def _max_cosine_against_bank(self, embedding: np.ndarray,
+                                 bank_rows: List[np.ndarray]) -> float:
+        """Max cosine between `embedding` and any row in `bank_rows`.
+        `_known_faces` stores raw embeddings (not L2-normalized), so
+        this normalizes both sides on the fly. Returns -1.0 for an
+        empty bank — callers treat that as 'no signal, skip drift
+        check'."""
+        if not bank_rows:
+            return -1.0
+        q = embedding.flatten().astype(np.float32)
+        q = q / (np.linalg.norm(q) + 1e-9)
+        best = -1.0
+        for row in bank_rows:
+            r = row.flatten().astype(np.float32)
+            r = r / (np.linalg.norm(r) + 1e-9)
+            c = float(np.dot(q, r))
+            if c > best:
+                best = c
+        return best
+
+    def _find_best_match_with_margin(
+        self, embedding: np.ndarray
+    ) -> Tuple[Optional[str], float, float]:
+        """Rank-1 match augmented with the rank-1 vs rank-2 margin over
+        DISTINCT identities. Used by the first-contact decision to
+        distinguish a clean re-acquisition (rank-1 clearly separated) from
+        a collision-risk near-tie (two identities bunched close together).
+
+        Returns (rank1_name, rank1_score, margin). If the gallery holds
+        fewer than two identities the margin is float('inf') — any match
+        is unambiguous because there's nothing to confuse it with."""
+        if not self._known_faces:
+            return None, 0.0, 0.0
+
+        q = embedding.flatten().astype(np.float32)
+        q = q / (np.linalg.norm(q) + 1e-9)
+
+        if self._bank_dirty:
+            self._rebuild_embedding_bank()
+        if self._emb_bank is None:
+            return None, 0.0, 0.0
+
+        scores = q @ self._emb_bank.T                         # (N,)
+        # Collapse to best-per-identity so margin is measured across
+        # DISTINCT people, not across multiple bank rows of the same person.
+        best_per_identity: Dict[str, float] = {}
+        for name, s in zip(self._bank_labels, scores):
+            if s > best_per_identity.get(name, -2.0):
+                best_per_identity[name] = float(s)
+
+        ranked = sorted(best_per_identity.items(), key=lambda t: -t[1])
+        if not ranked:
+            return None, 0.0, 0.0
+        best_name, best_score = ranked[0]
+        if len(ranked) == 1:
+            return best_name, best_score, float("inf")
+        second_score = ranked[1][1]
+        margin = best_score - second_score
+
+        # Keep the recent-match cache warm for the strict-match path — same
+        # behavior as `_find_best_match`, just with the margin tacked on.
+        if best_score >= MATCH_THRESHOLD:
+            self._recent_matches = [
+                (c, n) for c, n in self._recent_matches if n != best_name
+            ]
+            self._recent_matches.insert(0, (q.copy(), best_name))
+            if len(self._recent_matches) > self._recent_max:
+                self._recent_matches.pop()
+
+        return best_name, best_score, margin
 
     def _find_best_match_excluding(self, embedding: np.ndarray, exclude_name: str) -> Tuple[Optional[str], float]:
         if not self._known_faces:

@@ -1,59 +1,85 @@
 # CLAUDE.md
 Guidance for Claude Code when working in this repo.
-## Project
-Face verification pipeline: FaceNet embeddings + cosine similarity on
-LFW. Offline evaluation (numbered runs) plus a real-time webcam +
-Flask dashboard with two-stage enrollment, IoU tracking, FIQA.
+
+## Primary goal
+**Improve the live face-recognition pipeline** on the real failure
+modes: re-acquisition, crowded-scene crossings, pose / lighting
+drift, fast-enroll noise, low-res surveillance.
+
+## Project layout
+```
+src/             core library (all live-pipeline code + eval harnesses)
+scripts/         live entry points + run scripts + plot tool
+tests/           pytest (unit + synthetic + real-data harness tests)
+web/             dashboard + live page (Flask static)
+outputs/runs/    per-run JSON artifacts + rolling README changelog
+outputs/plots/   per-run scenario bar charts
+data/            enrollments/ + *.db + real_eval/ (scface/chokepoint)
+docs/prompts/    durable prompts (optimize_recognition.md, improve_pose_and_distance.md)
+docs/            real_data_eval.md (harness + dataset layout docs)
+```
+`data/enrollments/` is live-pipeline enrollment storage. `data/real_eval/`
+holds the surveillance/pose datasets — gitignored, populated manually.
+
 ## Commands
 ```bash
-python -m venv venv && source venv/bin/activate     # Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate       # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-pytest tests/ -v                                     # unit + integration
-black .                                              # format
-python scripts/plumbing/ingest_lfw.py                # data
-python scripts/plumbing/make_pairs_v4.py             # current pair set
-python -m scripts.models.run_005                     # most recent offline eval
-python scripts/live_webcam.py                        # live app
-python scripts/server.py                             # dashboard (127.0.0.1:5000)
+pytest tests/ -v                                       # unit + harness tests
+python scripts/server.py                               # dashboard (127.0.0.1:5000)
+python scripts/live_webcam.py                          # standalone live app
+python -m scripts.models.run_NNN                       # run an experiment
+python scripts/plot_run.py                             # (re)render run plots
 ```
-## Architecture
-- `src/similarity.py` — cosine / Euclidean distance
-- `src/quality.py`    — FIQA: sharpness, illumination, pose
-- `src/tracker.py`    — `FaceTracker` IoU greedy matching, stable `track_id`
-- `src/gatekeeper.py` — enrollment state machine, tracking lock, embedding bank
-- `src/database.py`   — SQLite identity store, async writer thread
-- `scripts/server.py` — Flask + camera + ML threads + REST + MJPEG
-- `web/`              — live page + identity-management dashboard
 
-**Live (7 stages).** Detect (MTCNN) → Track (IoU) → Align → Quality gate
-→ Embed (FaceNet 128-d, async) → Gatekeeper → Persist.
-**Offline.** `configs/pairs_v{1..4}.csv` → `scripts/models/run_{001..005}.py`
-→ `outputs/runs/run_NNN.json` → `scripts/plots/*`.
-## Principles
-Data-centric iteration · quality-gate early · tracking lock is permanent
-per session · runs use module syntax (`python -m scripts.models.run_XXX`).
-## Run convention (required for every pipeline change)
-One **hypothesis per run**. Per run, land every artifact:
-- `scripts/models/run_NNN.py` — reproducible entry
+## Architecture (live pipeline is the system)
+- `src/similarity.py`  — cosine / Euclidean distance
+- `src/quality.py`     — FIQA: sharpness, illumination, pose (tunable thresholds at top)
+- `src/tracker.py`     — `FaceTracker` IoU greedy matching, stable `track_id`
+- `src/gatekeeper.py`  — enrollment state machine, tracking lock, embedding bank. **The primary surface for optimization.** Knobs: `MATCH_THRESHOLD`, `REMATCH_THRESHOLD`, `ENROLL_THRESHOLD`, `CONSENSUS_FRAMES`, `MAX_EMBEDDINGS_PER_IDENTITY`.
+- `src/database.py`    — SQLite identity store, async writer thread
+- `src/memory.py`, `src/speech.py` — session events, optional transcription
+- `src/alignment.py`   — `align_face` (2-pt/160, FaceNet) + `align_face_5point` (5-pt/112, ArcFace)
+- `src/embedder.py`    — `get_embedder()` → ArcFace (default, buffalo_l ONNX) or FaceNet; `FACE_EMBEDDER` env toggles
+- `src/live_eval.py`, `src/real_data_eval.py` — synthetic + real-data harnesses
+- `scripts/server.py`  — Flask + camera + ML worker threads + REST + MJPEG
+- `scripts/live_webcam.py` — same 7-stage pipeline, standalone OpenCV window
+- `web/` — live page + identity-management dashboard (pauses pipeline on dashboard entry)
+
+**Live pipeline (7 stages).** Detect (MTCNN) → Track (IoU) → Align
+(2pt/5pt per embedder) → Quality gate → Embed (ArcFace 512-d,
+ONNX, async) → Gatekeeper → Persist.
+
+## Evaluation — two harnesses
+- **Synthetic** (`src/live_eval.py`) — seconds, deterministic. Eight
+  scenarios (S1–S8) feed scripted embedding streams into the real
+  `Gatekeeper.process()`. Direction-of-travel signal on state-machine
+  logic. S1 is the regression floor; S3 crossing the baseline failure.
+- **Real-data** (`src/real_data_eval.py`) — ~10–15 min, full pipeline
+  (MTCNN → align → `get_embedder()` → Gatekeeper) on SCface +
+  ChokePoint. Absolute calibration — confirms a synthetic win holds
+  on real faces. Layout + scenarios: `docs/real_data_eval.md`.
+
+## Run convention (every pipeline change)
+One **hypothesis per run**. Per run, land all of:
+- `scripts/models/run_NNN.py` — thin wrapper calling `live_eval.run_all`
 - `outputs/runs/run_NNN.json` — schema below
-- `outputs/plots/run_NNN_<name>.png` — versioned, never overwrite
-- one line in `outputs/runs/README.md` — rolling changelog
-- one commit `run_NNN: <hypothesis>` containing artifacts + `src/` diff
+- `outputs/plots/run_NNN_scenarios.png` — via `scripts/plot_run.py`
+- one line appended to `outputs/runs/README.md`
 
-**JSON (additive).** `run_id`, `created_at`, `git_sha`, `hypothesis`,
-`config_diff` (`{KNOB: [before, after]}`),
-`eval: {offline: {pairs_csv, best_threshold, val_metrics, test_metrics},
-live: [{scenario, trials, successes, failures, notes}]}`,
-`decision` (`keep` / `revert` / `inconclusive`), `notes`.
+**JSON (additive).** `run_id`, `eval_type` (`"synth"` | `"real"`),
+`created_at`, `git_sha`, `hypothesis`, `config_diff`
+(`{KNOB: [before, after]}`), `knobs` (full snapshot), `scenarios`
+(`[{id, trials, successes, success_rate, notes}]`), `aggregate`,
+`decision` (`keep` / `revert` / `inconclusive`), `notes`. Real-data
+runs additionally carry `datasets` listing the roots walked.
 
-**Live scenarios.** S1 single-lock · S2 two-no-cross · S3 crossing
-· S4 re-acquisition · S5 pose drift · S6 illumination. 5 trials each,
-operator hands back counts. Offline F1 is the regression floor.
+**Decision rule — keep only if** S1 floor stays ≥ 95 %, the targeted
+scenario improves ≥ 20 % absolute, and no other scenario regresses
+≥ 20 %. Otherwise revert the `src/` change; artifacts stay. Full
+protocol: `docs/prompts/optimize_recognition.md`.
 
-**Decision — keep only if** offline F1 drops ≤ 2 pts AND targeted live
-scenario up ≥ 20 % AND no other scenario down ≥ 20 %. Otherwise revert
-`src/` but keep artifacts. Full prompt: `docs/prompts/optimize_recognition.md`.
 ## Out of scope
-No retraining / no embedder swaps. No enrichment or reverse-image
-subsystem (removed — don't reintroduce). Don't mirror knob values here;
-git blame over `src/` is authoritative.
+No model training. No offline LFW pair eval — it's gone, don't
+resurrect. No detector swap (MTCNN stays for now). Video-replay
+harness is future work.

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identity Management — Face Recognition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/dashboard.css" />
+</head>
+<body class="dashboard-page">
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-dot"></span>
+      <span class="brand-text">Face Recognition</span>
+      <span class="brand-subtitle">Identity Management</span>
+    </div>
+    <nav class="topbar-nav">
+      <a class="nav-link" href="/">Live</a>
+      <a class="nav-link active" href="/dashboard">Dashboard</a>
+    </nav>
+    <div class="topbar-meta">
+      <div class="meta-item">
+        <span class="meta-label">Known</span>
+        <span class="meta-value" id="meta-total">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Pipeline</span>
+        <span class="meta-value pipeline-pill paused" id="pipeline-pill">paused</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="dash-layout">
+    <!-- LEFT: identity grid -->
+    <section class="dash-grid-wrap">
+      <div class="dash-grid-head">
+        <input type="text" class="dash-search" id="search"
+               placeholder="Search by name or notes…" autocomplete="off" />
+        <div class="dash-grid-hint" id="dash-grid-hint">
+          Click a person to view & edit their profile.
+        </div>
+        <div class="dash-bulk-bar" id="bulk-bar" hidden>
+          <span class="bulk-count"><span id="bulk-count-n">0</span> selected</span>
+          <button type="button" class="btn btn-ghost" id="btn-bulk-clear">Clear</button>
+          <button type="button" class="btn btn-danger" id="btn-bulk-delete">
+            Delete selected
+          </button>
+        </div>
+      </div>
+      <div class="dash-grid" id="grid">
+        <div class="dash-empty" id="grid-empty">
+          No identities yet — enrol someone via the live view, then refresh.
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: detail -->
+    <aside class="dash-detail" id="detail" data-open="false">
+      <div class="dash-placeholder" id="detail-placeholder">
+        <div class="dash-placeholder-icon">◉</div>
+        <div>Select a person from the grid to view their profile.</div>
+      </div>
+
+      <article class="dash-profile" id="profile" hidden>
+        <!-- Header: thumb + name + meta -->
+        <header class="profile-head">
+          <div class="profile-thumb" id="profile-thumb">
+            <span class="thumb-placeholder">?</span>
+          </div>
+          <div class="profile-head-body">
+            <input type="text" class="profile-name-input" id="profile-display-name"
+                   placeholder="Display name (editable)" maxlength="200" />
+            <div class="profile-internal" id="profile-internal">—</div>
+            <div class="profile-chips">
+              <span class="profile-chip" id="chip-matches">0 matches</span>
+              <span class="profile-chip" id="chip-firstseen">—</span>
+              <span class="profile-chip" id="chip-lastseen">—</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-danger" id="btn-delete">
+            Delete
+          </button>
+        </header>
+
+        <!-- Notes -->
+        <section class="profile-section">
+          <label class="profile-label" for="profile-notes">Notes</label>
+          <textarea class="profile-notes" id="profile-notes"
+                    maxlength="4000"
+                    placeholder="Free-form context (organization, location, title…)."></textarea>
+          <div class="profile-row-end">
+            <span class="profile-hint" id="save-hint"></span>
+            <button type="button" class="btn btn-secondary" id="btn-save-fields">
+              Save profile
+            </button>
+          </div>
+        </section>
+
+        <!-- Transcripts / events -->
+        <section class="profile-section">
+          <label class="profile-label">Session history</label>
+          <div class="events-box" id="events-box">
+            <div class="dash-empty-soft">No events recorded for this identity.</div>
+          </div>
+        </section>
+      </article>
+    </aside>
+  </main>
+
+  <!-- Confirmation modal — gating destructive identity deletion. -->
+  <div class="modal-backdrop" id="delete-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <h2 class="modal-title" id="delete-title">Delete identity</h2>
+      <p class="modal-body">
+        This permanently removes
+        <strong id="delete-target-name">this person</strong>
+        from the database, all face embeddings, every transcribed event,
+        and the corresponding files in <code>data/enrollments/</code>. This action
+        cannot be undone.
+      </p>
+      <p class="modal-body modal-confirm-line">
+        Type <code id="delete-confirm-name">name</code> to confirm:
+      </p>
+      <input type="text" class="modal-input" id="delete-confirm-input"
+             autocomplete="off" placeholder="Identity name" />
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="delete-cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="delete-confirm" disabled>
+          Delete permanently
+        </button>
+      </div>
+      <div class="modal-error" id="delete-error" hidden></div>
+    </div>
+  </div>
+
+  <!-- Lightweight toast for success/error feedback. -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

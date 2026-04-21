@@ -1,0 +1,169 @@
+{
+  "run_id": "run_018",
+  "eval_type": "identification",
+  "created_at": "2026-04-20T16:21:24+00:00",
+  "git_sha": "ccf64cb",
+  "hypothesis": "Revert REMATCH_THRESHOLD 0.20 \u2192 0.30 under gallery-130 identification. Run_017 at REMATCH=0.20 produced 46/130 (35 %) enrollment dedup collisions on SCface \u2014 distinct subjects merging into existing identities at first-contact. Expected at REMATCH=0.30: dedup collisions drop to single digits; rank1_gk on surviving enrollees remains \u2265 90 % on d1_far (per run_015\u2019s verification numbers the embedder is strong at this threshold). If dedup stays high, collisions are embedder-bound (frontal mugshot cosines > 0.30 for many cross-subject pairs) and REMATCH is not the right lever.",
+  "config_diff": {
+    "REMATCH_THRESHOLD": [
+      0.2,
+      0.3
+    ]
+  },
+  "knobs": {
+    "MATCH_THRESHOLD": 0.4,
+    "REMATCH_THRESHOLD": 0.3,
+    "ENROLL_THRESHOLD": 0.2,
+    "CONSENSUS_FRAMES": 5,
+    "MAX_EMBEDDINGS_PER_IDENTITY": 8
+  },
+  "scenarios": [
+    {
+      "id": "S1_single_lock",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S2_two_no_cross",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S3_crossing",
+      "trials": 25,
+      "successes": 0,
+      "success_rate": 0.0,
+      "notes": ""
+    },
+    {
+      "id": "S4_reacquisition",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S5_pose_drift",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S6_illumination",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S7_hard_pose",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S8_distance_noise",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "scface_identification_d1_far",
+      "trials": 87,
+      "successes": 45,
+      "success_rate": 0.5172413793103449,
+      "notes": "gallery=90 \u00b7 rank1_gk=45/87 (0.52) \u00b7 rank1_emb=84/87 (0.97) \u00b7 rank5_emb=86/87 (0.99) \u00b7 enroll: 39 embed-fail, 1 dedup-collision \u00b7 40 queries skipped (subject not in gallery)"
+    },
+    {
+      "id": "scface_identification_d2_mid",
+      "trials": 90,
+      "successes": 90,
+      "success_rate": 1.0,
+      "notes": "gallery=90 \u00b7 rank1_gk=90/90 (1.00) \u00b7 rank1_emb=90/90 (1.00) \u00b7 rank5_emb=90/90 (1.00) \u00b7 enroll: 39 embed-fail, 1 dedup-collision \u00b7 40 queries skipped (subject not in gallery)"
+    },
+    {
+      "id": "scface_identification_d3_close",
+      "trials": 90,
+      "successes": 89,
+      "success_rate": 0.9888888888888889,
+      "notes": "gallery=90 \u00b7 rank1_gk=89/90 (0.99) \u00b7 rank1_emb=90/90 (1.00) \u00b7 rank5_emb=90/90 (1.00) \u00b7 enroll: 39 embed-fail, 1 dedup-collision \u00b7 40 queries skipped (subject not in gallery)"
+    }
+  ],
+  "aggregate": {
+    "total_trials": 467,
+    "total_successes": 399,
+    "success_rate": 0.854389721627409,
+    "synth_aggregate": {
+      "total_trials": 200,
+      "total_successes": 175,
+      "success_rate": 0.875
+    },
+    "identification_aggregate": {
+      "total_trials": 267,
+      "total_successes": 224,
+      "success_rate": 0.8389513108614233,
+      "scenario_diagnostics": {
+        "scface_identification_d1_far": {
+          "n_enrolled": 90,
+          "n_queries": 130,
+          "n_embed_success": 87,
+          "rank1_gk_accept": 45,
+          "rank1_emb": 84,
+          "rank5_emb": 86,
+          "rank10_emb": 86,
+          "enroll_embed_fail": 39,
+          "dedup_collisions": 1,
+          "skipped_no_enroll": 40,
+          "rank1_gk_accept_rate": 0.5172413793103449,
+          "rank1_emb_accept_rate": 0.9655172413793104,
+          "rank5_emb_accept_rate": 0.9885057471264368,
+          "rank10_emb_accept_rate": 0.9885057471264368
+        },
+        "scface_identification_d2_mid": {
+          "n_enrolled": 90,
+          "n_queries": 130,
+          "n_embed_success": 90,
+          "rank1_gk_accept": 90,
+          "rank1_emb": 90,
+          "rank5_emb": 90,
+          "rank10_emb": 90,
+          "enroll_embed_fail": 39,
+          "dedup_collisions": 1,
+          "skipped_no_enroll": 40,
+          "rank1_gk_accept_rate": 1.0,
+          "rank1_emb_accept_rate": 1.0,
+          "rank5_emb_accept_rate": 1.0,
+          "rank10_emb_accept_rate": 1.0
+        },
+        "scface_identification_d3_close": {
+          "n_enrolled": 90,
+          "n_queries": 130,
+          "n_embed_success": 90,
+          "rank1_gk_accept": 89,
+          "rank1_emb": 90,
+          "rank5_emb": 90,
+          "rank10_emb": 90,
+          "enroll_embed_fail": 39,
+          "dedup_collisions": 1,
+          "skipped_no_enroll": 40,
+          "rank1_gk_accept_rate": 0.9888888888888889,
+          "rank1_emb_accept_rate": 1.0,
+          "rank5_emb_accept_rate": 1.0,
+          "rank10_emb_accept_rate": 1.0
+        }
+      }
+    }
+  },
+  "decision": "revert",
+  "notes": "Revert. Per the run\u2019s decision rule d1_far rank1_gk must drop \u2264 5 pts; it dropped 42 pts (94 % \u2192 52 %). Hypothesis half-confirmed: dedup collisions DID drop dramatically (46 \u2192 1), so REMATCH=0.20 is clearly mis-calibrated for multi-identity enrollment. BUT the 39 newly-UNCERTAIN enrollments (subjects whose frontal mugshot cosines land in [0.20, 0.30) against someone already in the bank) now fail to enroll at all, and tail-similarity d1_far query matches in the same cosine band now fall below REMATCH and get rejected \u2014 the exact failure mode run_016 was solving. Deeper finding: REMATCH_THRESHOLD at gatekeeper.py:161 conflates two decisions with different optimal values: (a) cross-track dedup at first-contact (\u201cis this a duplicate of someone enrolled?\u201d \u2192 wants strict, ~MATCH_THRESHOLD=0.40); (b) re-acquisition of a lost track (\u201cdid this new track_id return the same person?\u201d \u2192 wants loose, ~0.20). One knob can\u2019t satisfy both. Architectural fix (run_019): route the first-contact dedup check through MATCH_THRESHOLD while leaving REMATCH_THRESHOLD governing the same-identity-returning path. S1 floor 100 %. Collision count, enrollment count, and rank-k numbers are now documented per-REMATCH; run_019 compares against the run_017 baseline for dedup and run_016 for d1_far retrieval.",
+  "datasets": [
+    "scface"
+  ]
+}

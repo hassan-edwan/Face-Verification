@@ -1,0 +1,68 @@
+{
+  "run_id": "run_014",
+  "eval_type": "real",
+  "created_at": "2026-04-20T04:08:19+00:00",
+  "git_sha": "ccf64cb",
+  "hypothesis": "Under kept ArcFace, lower MIN_FACE_PX from 40 to 20. Targets (a) SCface d1_far (faces 18-30 px, 100 % rejected by current gate) and (b) chokepoint_temporal_stability bookend-frame detection failures (248/600 skipped in run_013). Expected: d1_far moves off 0 %, temporal_stability lifts as more bookends survive the size gate.",
+  "config_diff": {
+    "MIN_FACE_PX": [
+      40,
+      20
+    ]
+  },
+  "knobs": {
+    "MATCH_THRESHOLD": 0.4,
+    "REMATCH_THRESHOLD": 0.3,
+    "ENROLL_THRESHOLD": 0.2,
+    "CONSENSUS_FRAMES": 5,
+    "MAX_EMBEDDINGS_PER_IDENTITY": 8
+  },
+  "scenarios": [
+    {
+      "id": "scface_mugshot_to_d1_far",
+      "trials": 130,
+      "successes": 69,
+      "success_rate": 0.5307692307692308,
+      "notes": "4 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "scface_mugshot_to_d2_mid",
+      "trials": 130,
+      "successes": 130,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "scface_mugshot_to_d3_close",
+      "trials": 130,
+      "successes": 128,
+      "success_rate": 0.9846153846153847,
+      "notes": "1 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "chokepoint_temporal_stability",
+      "trials": 600,
+      "successes": 569,
+      "success_rate": 0.9483333333333334,
+      "notes": "18 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "chokepoint_cross_camera",
+      "trials": 200,
+      "successes": 199,
+      "success_rate": 0.995,
+      "notes": "1 pair(s) skipped with error (no face / mtcnn reject)"
+    }
+  ],
+  "aggregate": {
+    "total_trials": 1190,
+    "total_successes": 1095,
+    "success_rate": 0.9201680672268907
+  },
+  "decision": "keep",
+  "notes": "Decisive keep. d1_far 0 %\u219253 % (+53 pts), temporal_stability 57 %\u219295 % (+38 pts), d2_mid 92 %\u2192100 % (+8), d3_close flat at 98 %, cross_camera flat at 99.5 %. Both targets cleared the +20 % threshold with zero regressions. Aggregate 66.2 %\u219292.0 %. Detection at 20 px is now essentially solved (d1_far: 4/130 skipped; temporal_stability: 18/600 skipped) \u2014 MTCNN produces usable crops and ArcFace handles them. Remaining d1_far failures (61/126 detected) are *match-layer*, not detection. Next run should target MATCH_THRESHOLD, not MTCNN_CONF_MIN as originally scheduled. Keep propagates to live scripts (server.py, live_webcam.py).",
+  "datasets": [
+    "scface",
+    "chokepoint"
+  ]
+}
