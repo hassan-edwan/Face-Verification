@@ -20,17 +20,7 @@ data/
 *.pickle
 
 # --- Outputs & Logs ---
-# Default: ignore everything under outputs/ (bench dumps, embedding caches,
-# error-analysis folders) then carve back in the tracked run-convention
-# artifacts: per-run JSONs, per-run plot PNGs, and the changelog.
-/outputs/*
-!/outputs/runs/
-/outputs/runs/*
-!/outputs/runs/README.md
-!/outputs/runs/run_*.json
-!/outputs/plots/
-/outputs/plots/*
-!/outputs/plots/run_*.png
+/outputs/ 
 
 # --- OS and IDE specific ---
 .DS_Store
