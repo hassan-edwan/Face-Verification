@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Face Recognition — Live Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-dot"></span>
+      <span class="brand-text">Face Recognition</span>
+      <span class="brand-subtitle">Live Dashboard</span>
+    </div>
+    <nav class="topbar-nav">
+      <a class="nav-link active" href="/">Live</a>
+      <a class="nav-link" href="/dashboard">Dashboard</a>
+    </nav>
+    <div class="topbar-meta">
+      <div class="meta-item">
+        <span class="meta-label">Known</span>
+        <span class="meta-value" id="meta-known">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">FPS</span>
+        <span class="meta-value" id="meta-fps">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Queue</span>
+        <span class="meta-value" id="meta-queue">—</span>
+      </div>
+      <div class="meta-item status-pill" id="system-pill">
+        <span class="status-dot" id="system-dot"></span>
+        <span class="status-text" id="system-status">Connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ─────────── LEFT: VIDEO STAGE (~60%) ─────────── -->
+    <section class="stage">
+      <div class="video-wrap">
+        <img id="video" src="/api/video_feed" alt="Live camera feed" />
+        <div class="video-overlay-top">
+          <div class="badge" id="faces-badge">
+            <span id="faces-total">0</span>
+            <span class="badge-sub">faces</span>
+          </div>
+          <div class="badge subtle" id="status-msg-badge" hidden></div>
+        </div>
+        <div class="video-overlay-bottom">
+          <div class="legend">
+            <span class="legend-chip recognized"><i></i>Recognized</span>
+            <span class="legend-chip learning"><i></i>Learning</span>
+            <span class="legend-chip new"><i></i>New</span>
+            <span class="legend-chip analyzing"><i></i>Analyzing</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────── RIGHT: DATA PANEL (~40%) ─────────── -->
+    <aside class="panel">
+
+      <!-- Primary identity card -->
+      <section class="card identity-card" id="identity-card">
+        <div class="identity-head">
+          <div class="thumb" id="thumb">
+            <span class="thumb-placeholder">?</span>
+          </div>
+          <div class="identity-body">
+            <div class="identity-status">
+              <span class="status-dot" id="identity-dot"></span>
+              <span class="status-text" id="identity-status">No face detected</span>
+            </div>
+            <h1 class="identity-name" id="identity-name">—</h1>
+            <div class="identity-alias" id="identity-alias" hidden></div>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Confidence</div>
+            <div class="metric-bar">
+              <div class="metric-fill" id="conf-fill"></div>
+            </div>
+            <div class="metric-value" id="conf-value">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Quality</div>
+            <div class="metric-bar">
+              <div class="metric-fill quality-fill" id="qual-fill"></div>
+            </div>
+            <div class="metric-value" id="qual-value">—</div>
+          </div>
+        </div>
+
+        <div class="enrollment" id="enrollment-block" hidden>
+          <div class="enrollment-label">
+            <span>Enrollment progress</span>
+            <span id="enroll-frac">0/0</span>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill enrollment-fill" id="enroll-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metadata card -->
+      <section class="card" id="metadata-card">
+        <div class="card-title">Metadata</div>
+        <dl class="datalist">
+          <div class="row">
+            <dt>First seen</dt>
+            <dd id="meta-enrolled">—</dd>
+          </div>
+          <div class="row">
+            <dt>Last seen</dt>
+            <dd id="meta-lastseen">—</dd>
+          </div>
+          <div class="row">
+            <dt>Total matches</dt>
+            <dd id="meta-matches">—</dd>
+          </div>
+          <div class="row">
+            <dt>Session</dt>
+            <dd id="meta-session">Idle</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- Transcript card -->
+      <section class="card transcript-card" id="transcript-card">
+        <div class="card-title">
+          <span>Transcript</span>
+          <span class="listening-pill" id="listening-pill" hidden>
+            <span class="mic-dot"></span>Listening
+          </span>
+        </div>
+        <div class="transcript-scroll" id="transcript-scroll">
+          <div class="transcript-empty" id="transcript-empty">
+            No transcript yet. Transcription starts automatically during an active session.
+          </div>
+        </div>
+        <div class="transcript-partial" id="transcript-partial" hidden></div>
+      </section>
+
+      <!-- Recent events card -->
+      <section class="card" id="events-card" hidden>
+        <div class="card-title">Recent memory</div>
+        <ul class="events-list" id="events-list"></ul>
+      </section>
+
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

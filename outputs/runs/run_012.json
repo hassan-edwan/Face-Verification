@@ -1,0 +1,61 @@
+{
+  "run_id": "run_012",
+  "eval_type": "real",
+  "created_at": "2026-04-19T21:12:22+00:00",
+  "git_sha": "ccf64cb",
+  "hypothesis": "Under ArcFace (run_011 kept), lower MIN_FACE_PX from 60 to 40. Expected to admit the 40\u201346 px d2 faces that the size gate previously rejected, now that the embedder handles low-res.",
+  "config_diff": {
+    "MIN_FACE_PX": [
+      60,
+      40
+    ]
+  },
+  "knobs": {
+    "MATCH_THRESHOLD": 0.4,
+    "REMATCH_THRESHOLD": 0.3,
+    "ENROLL_THRESHOLD": 0.2,
+    "CONSENSUS_FRAMES": 5,
+    "MAX_EMBEDDINGS_PER_IDENTITY": 8
+  },
+  "scenarios": [
+    {
+      "id": "scface_mugshot_to_d1_far",
+      "trials": 130,
+      "successes": 0,
+      "success_rate": 0.0,
+      "notes": "130 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "scface_mugshot_to_d2_mid",
+      "trials": 130,
+      "successes": 119,
+      "success_rate": 0.9153846153846154,
+      "notes": "11 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "scface_mugshot_to_d3_close",
+      "trials": 130,
+      "successes": 128,
+      "success_rate": 0.9846153846153847,
+      "notes": "1 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "chokepoint_temporal_stability",
+      "trials": 24,
+      "successes": 0,
+      "success_rate": 0.0,
+      "notes": "15 pair(s) skipped with error (no face / mtcnn reject)"
+    }
+  ],
+  "aggregate": {
+    "total_trials": 414,
+    "total_successes": 247,
+    "success_rate": 0.5966183574879227
+  },
+  "decision": "keep",
+  "notes": "KEEP. d2_mid 0.8 % \u2192 91.5 % (+90.8 pts) \u2014 hypothesis fully validated: ArcFace matches 40\u201346 px faces beautifully once the size gate admits them, whereas FaceNet under the same change (run_010) only moved d2 by +4.6 %. d3_close held at 98.5 % (+2.3 pts, no regression). Aggregate 30.4 % \u2192 59.7 %. d1_far stayed 0 % \u2014 faces are 18\u201330 px, still below the new 40 px floor; next-step candidate is MIN_FACE_PX=20 under ArcFace (run_013) which tests whether ArcFace gracefully handles 20\u201330 px inputs or if extreme low-res is a genuine cliff. chokepoint also stayed 0 % \u2014 the frame-size question needs per-pair size logging to diagnose; separate follow-up. Synthetic S1 untouched (MIN_FACE_PX not in synth path). Current kept stack: ArcFace (buffalo_l) + 5-pt/112 alignment + thresholds 0.40/0.30/0.20 + MIN_FACE_PX=40.",
+  "datasets": [
+    "scface",
+    "chokepoint"
+  ]
+}

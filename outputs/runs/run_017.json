@@ -1,0 +1,164 @@
+{
+  "run_id": "run_017",
+  "eval_type": "identification",
+  "created_at": "2026-04-20T15:30:44+00:00",
+  "git_sha": "ccf64cb",
+  "hypothesis": "First measurement of gallery-130 identification on SCface under the current ArcFace / REMATCH=0.20 config (unchanged from run_016). Phase 2 of the hardening: tests the audit's prediction that gallery-1 success_rate overstates live-pipeline performance. Reports rank-1 gk accept (production number), rank-1 emb (embedder ceiling ignoring REMATCH), and rank-5/10 emb (lookalike crowding). Expected: d3_close rank-1 remains near-ceiling; d2_mid near-ceiling; d1_far drops materially from run_016's gallery-1 91 % as 129 distractors compete for the top slot.",
+  "config_diff": {},
+  "knobs": {
+    "MATCH_THRESHOLD": 0.4,
+    "REMATCH_THRESHOLD": 0.2,
+    "ENROLL_THRESHOLD": 0.2,
+    "CONSENSUS_FRAMES": 5,
+    "MAX_EMBEDDINGS_PER_IDENTITY": 8
+  },
+  "scenarios": [
+    {
+      "id": "S1_single_lock",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S2_two_no_cross",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S3_crossing",
+      "trials": 25,
+      "successes": 0,
+      "success_rate": 0.0,
+      "notes": ""
+    },
+    {
+      "id": "S4_reacquisition",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S5_pose_drift",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S6_illumination",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S7_hard_pose",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "S8_distance_noise",
+      "trials": 25,
+      "successes": 25,
+      "success_rate": 1.0,
+      "notes": ""
+    },
+    {
+      "id": "scface_identification_d1_far",
+      "trials": 81,
+      "successes": 76,
+      "success_rate": 0.9382716049382716,
+      "notes": "gallery=84 \u00b7 rank1_gk=76/81 (0.94) \u00b7 rank1_emb=78/81 (0.96) \u00b7 rank5_emb=80/81 (0.99) \u00b7 enroll: 0 embed-fail, 46 dedup-collision \u00b7 46 queries skipped (subject not in gallery)"
+    },
+    {
+      "id": "scface_identification_d2_mid",
+      "trials": 84,
+      "successes": 84,
+      "success_rate": 1.0,
+      "notes": "gallery=84 \u00b7 rank1_gk=84/84 (1.00) \u00b7 rank1_emb=84/84 (1.00) \u00b7 rank5_emb=84/84 (1.00) \u00b7 enroll: 0 embed-fail, 46 dedup-collision \u00b7 46 queries skipped (subject not in gallery)"
+    },
+    {
+      "id": "scface_identification_d3_close",
+      "trials": 84,
+      "successes": 83,
+      "success_rate": 0.9880952380952381,
+      "notes": "gallery=84 \u00b7 rank1_gk=83/84 (0.99) \u00b7 rank1_emb=84/84 (1.00) \u00b7 rank5_emb=84/84 (1.00) \u00b7 enroll: 0 embed-fail, 46 dedup-collision \u00b7 46 queries skipped (subject not in gallery)"
+    }
+  ],
+  "aggregate": {
+    "total_trials": 449,
+    "total_successes": 418,
+    "success_rate": 0.9309576837416481,
+    "synth_aggregate": {
+      "total_trials": 200,
+      "total_successes": 175,
+      "success_rate": 0.875
+    },
+    "identification_aggregate": {
+      "total_trials": 249,
+      "total_successes": 243,
+      "success_rate": 0.9759036144578314,
+      "scenario_diagnostics": {
+        "scface_identification_d1_far": {
+          "n_enrolled": 84,
+          "n_queries": 130,
+          "n_embed_success": 81,
+          "rank1_gk_accept": 76,
+          "rank1_emb": 78,
+          "rank5_emb": 80,
+          "rank10_emb": 80,
+          "enroll_embed_fail": 0,
+          "dedup_collisions": 46,
+          "skipped_no_enroll": 46,
+          "rank1_gk_accept_rate": 0.9382716049382716,
+          "rank1_emb_accept_rate": 0.9629629629629629,
+          "rank5_emb_accept_rate": 0.9876543209876543,
+          "rank10_emb_accept_rate": 0.9876543209876543
+        },
+        "scface_identification_d2_mid": {
+          "n_enrolled": 84,
+          "n_queries": 130,
+          "n_embed_success": 84,
+          "rank1_gk_accept": 84,
+          "rank1_emb": 84,
+          "rank5_emb": 84,
+          "rank10_emb": 84,
+          "enroll_embed_fail": 0,
+          "dedup_collisions": 46,
+          "skipped_no_enroll": 46,
+          "rank1_gk_accept_rate": 1.0,
+          "rank1_emb_accept_rate": 1.0,
+          "rank5_emb_accept_rate": 1.0,
+          "rank10_emb_accept_rate": 1.0
+        },
+        "scface_identification_d3_close": {
+          "n_enrolled": 84,
+          "n_queries": 130,
+          "n_embed_success": 84,
+          "rank1_gk_accept": 83,
+          "rank1_emb": 84,
+          "rank5_emb": 84,
+          "rank10_emb": 84,
+          "enroll_embed_fail": 0,
+          "dedup_collisions": 46,
+          "skipped_no_enroll": 46,
+          "rank1_gk_accept_rate": 0.9880952380952381,
+          "rank1_emb_accept_rate": 1.0,
+          "rank5_emb_accept_rate": 1.0,
+          "rank10_emb_accept_rate": 1.0
+        }
+      }
+    }
+  },
+  "decision": "inconclusive",
+  "notes": "Baseline for gallery-N identification. BIG FINDING: at REMATCH=0.20, enrolling 130 distinct SCface subjects produces only 84 unique identities (46 subjects / 35 % merge into existing identities because cross-subject frontal-mugshot cosines sit above 0.20). The verification harness (gallery=1) could not see this by construction. On the surviving 84 enrolled subjects: rank1_gk=0.938 / 1.000 / 0.988 (d1/d2/d3), rank1_emb=0.963 / 1.000 / 1.000, rank5_emb=0.988 / 1.000 / 1.000. REMATCH is NOT the bottleneck on the surviving-enrolled path (gap between rank1_gk and rank1_emb is only 2-3 pts); the enrollment dedup collision IS. In production, any of the 46 merged walkers returning would be confidently matched to the wrong pre-existing identity. S1 floor 100 %. Decision=inconclusive (baseline \u2014 no knob diff), but this run hard-invalidates run_016\u2019s keep: the 91 % gallery-1 d1_far number masks a 35 % identity-merge rate at the same REMATCH in a real multi-identity deployment. run_018 should revert REMATCH to 0.30 and re-measure dedup collisions to confirm the root cause.",
+  "datasets": [
+    "scface"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "run_id": "run_013",
+  "eval_type": "real",
+  "created_at": "2026-04-20T03:46:28+00:00",
+  "git_sha": "ccf64cb",
+  "hypothesis": "With per-frame GT XML in place, the chokepoint loader now builds same-subject pairs (temporal_stability + cross_camera). Expect a real, nonzero baseline under kept config (ArcFace, MIN_FACE_PX=40). No model-side change \u2014 this run measures what chokepoint actually looks like once the apparatus stops comparing strangers.",
+  "config_diff": {
+    "chokepoint_loader": [
+      "session_cam_as_subject",
+      "gt_xml_per_person_eyes"
+    ]
+  },
+  "knobs": {
+    "MATCH_THRESHOLD": 0.4,
+    "REMATCH_THRESHOLD": 0.3,
+    "ENROLL_THRESHOLD": 0.2,
+    "CONSENSUS_FRAMES": 5,
+    "MAX_EMBEDDINGS_PER_IDENTITY": 8
+  },
+  "scenarios": [
+    {
+      "id": "scface_mugshot_to_d1_far",
+      "trials": 130,
+      "successes": 0,
+      "success_rate": 0.0,
+      "notes": "130 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "scface_mugshot_to_d2_mid",
+      "trials": 130,
+      "successes": 119,
+      "success_rate": 0.9153846153846154,
+      "notes": "11 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "scface_mugshot_to_d3_close",
+      "trials": 130,
+      "successes": 128,
+      "success_rate": 0.9846153846153847,
+      "notes": "1 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "chokepoint_temporal_stability",
+      "trials": 600,
+      "successes": 342,
+      "success_rate": 0.57,
+      "notes": "248 pair(s) skipped with error (no face / mtcnn reject)"
+    },
+    {
+      "id": "chokepoint_cross_camera",
+      "trials": 200,
+      "successes": 199,
+      "success_rate": 0.995,
+      "notes": "1 pair(s) skipped with error (no face / mtcnn reject)"
+    }
+  ],
+  "aggregate": {
+    "total_trials": 1190,
+    "total_successes": 788,
+    "success_rate": 0.6621848739495798
+  },
+  "decision": "keep (baseline)",
+  "notes": "Baseline for the new chokepoint apparatus. Old runs (009-012) reported chokepoint at 0 % because the loader paired different people; that number is not comparable to anything here. SCface scenarios unchanged from run_012, re-run for a complete snapshot. Decision = keep (baseline) regardless of chokepoint magnitude \u2014 the optimize rule (\u0394 \u2265 20 % vs prior) doesn't apply when the prior wasn't a valid measurement. Next run will target whichever chokepoint scenario is weaker (likely cross_camera \u2014 it's the pose-variation test).",
+  "datasets": [
+    "scface",
+    "chokepoint"
+  ]
+}
