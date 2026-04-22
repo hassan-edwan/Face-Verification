@@ -1,0 +1,8 @@
+{
+  "platt_a": -14.183657772550998,
+  "platt_b": 6.373907661407262,
+  "threshold": 0.43,
+  "source_run": "outputs/runs/run_005.json",
+  "pairs_csv": "configs/pairs_v4.csv",
+  "n_val_pairs": 814
+}
