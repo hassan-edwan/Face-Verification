@@ -1,8 +1,8 @@
 """
-Run 005 — Center-Crop Preprocessing
+Run 005 - Center-Crop Preprocessing
 =====================================
 Pairs  : configs/pairs_v4.csv
-Changes: Model/inference improvement — images are center-cropped before
+Changes: Model/inference improvement - images are center-cropped before
          embedding. LFW images (250x250) have variable padding around the
          face; trimming 15% from each edge gives FaceNet a tighter, more
          consistent field of view matching its training distribution.

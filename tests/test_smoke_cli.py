@@ -1,5 +1,5 @@
 """
-Smoke test — Milestone 3 inference path.
+Smoke test - Milestone 3 inference path.
 
 Runs the CLI end-to-end on a stubbed verifier (no FaceNet, no LFW) to confirm
 the main path returns a well-formed JSON record with all contract fields.
@@ -15,7 +15,7 @@ import pytest
 
 
 class _StubVerifier:
-    """Drop-in replacement for FaceVerifier — skips embedding entirely."""
+    """Drop-in replacement for FaceVerifier - skips embedding entirely."""
     threshold = 0.45
 
     def verify(self, left, right):

@@ -1,5 +1,5 @@
 """
-Pair Generator v2 — Uniform Identity Weighting
+Pair Generator v2 - Uniform Identity Weighting
 ================================================
 Improvement over v1: uses an isolated RNG (random.Random) instead of
 global random state, preventing external code from corrupting the seed.
@@ -76,7 +76,7 @@ def sample_diff_pairs(id_map: dict, n: int, rng: random.Random) -> list:
 def generate_pairs(lfw_path: str = LFW_PATH,
                    output_path: str = OUTPUT_PATH,
                    seed: int = SEED) -> pd.DataFrame:
-    rng = random.Random(seed)   # isolated RNG — does not affect global state
+    rng = random.Random(seed)   # isolated RNG - does not affect global state
     np.random.seed(seed)
 
     identities = sorted([

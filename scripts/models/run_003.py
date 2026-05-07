@@ -1,5 +1,5 @@
 """
-Run 003 — Deduplication
+Run 003 - Deduplication
 ========================
 Pairs  : configs/pairs_v3.csv
 Changes: Pair construction updated to deduplicate canonically so (A,B) and

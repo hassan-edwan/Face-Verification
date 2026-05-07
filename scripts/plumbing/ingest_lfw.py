@@ -1,5 +1,5 @@
 """
-LFW Ingestion — Data Manifest Generator
+LFW Ingestion - Data Manifest Generator
 =========================================
 Downloads LFW via TensorFlow Datasets, writes images to disk in the
 folder structure expected by the rest of the pipeline, splits identities
@@ -12,12 +12,12 @@ Folder structure written:
             <Identity_Name>_0002.jpg
             ...
 
-Split policy: by identity — no person appears in more than one split.
+Split policy: by identity - no person appears in more than one split.
 This prevents identity leakage between training and evaluation.
 
 Outputs:
-    data/lfw/               — images on disk
-    configs/manifest.json   — split policy, counts, provenance
+    data/lfw/               - images on disk
+    configs/manifest.json   - split policy, counts, provenance
 
 Usage:
     python scripts/plumbing/ingest_lfw.py
@@ -185,7 +185,7 @@ def ingest_lfw(tfds_version: str = TFDS_VERSION,
     # 6. Build and save manifest
     manifest = {
         "seed":         seed,
-        "split_policy": "By identity — no person appears in more than one split.",
+        "split_policy": "By identity - no person appears in more than one split.",
         "data_source":  tfds_version,
         "lfw_dir":      lfw_out_dir,
         "cache_dir":    str(ds_builder.data_dir),

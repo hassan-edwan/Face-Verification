@@ -1,5 +1,5 @@
 """
-Integration Test — Step 5.10
+Integration Test - Step 5.10
 =============================
 Runs the full evaluation path (pairs → embeddings → scores → metrics → JSON)
 using a tiny synthetic fixture.
@@ -92,7 +92,7 @@ def make_pairs_csv(lfw_root: str, id_map: dict, out_path: str) -> pd.DataFrame:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Inline pipeline (mirrors your scripts — no external imports needed)
+# Inline pipeline (mirrors your scripts - no external imports needed)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> np.ndarray:
@@ -169,7 +169,7 @@ def run_evaluation(pairs_csv: str, lfw_root: str, out_json: str,
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Fake embedder — no model download, fully deterministic
+# Fake embedder - no model download, fully deterministic
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def fake_embedder(images: list) -> np.ndarray:

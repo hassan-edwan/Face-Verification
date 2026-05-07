@@ -1,5 +1,5 @@
 """
-Pair Generator v3 — Deduplication
+Pair Generator v3 - Deduplication
 ===================================
 Improvement over v2: pairs are deduplicated using canonical keys so
 (A, B, i, j) and (B, A, j, i) are treated as the same pair and not
@@ -47,7 +47,7 @@ def build_id_map(lfw_path: str, identity_list: list) -> dict:
 def sample_same_pairs(id_map: dict, n: int, rng: random.Random) -> list:
     """
     Samples n unique same-identity pairs. Canonical key:
-    (person, min_idx, max_idx) — ensures (i, j) == (j, i) are not duplicated.
+    (person, min_idx, max_idx) - ensures (i, j) == (j, i) are not duplicated.
     """
     eligible = [name for name, idxs in id_map.items() if len(idxs) >= 2]
     pairs, seen = [], set()

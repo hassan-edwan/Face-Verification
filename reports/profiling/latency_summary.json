@@ -1,0 +1,96 @@
+{
+  "system_version": "v1.0-final",
+  "environment": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.9",
+    "processor": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel",
+    "logical_cores": 12,
+    "physical_cores": 10,
+    "cpu_max_mhz": 1700.0,
+    "ram_gb": 15.7,
+    "numpy": "2.4.2",
+    "tensorflow": "2.20.0",
+    "tf_visible_gpus": []
+  },
+  "reps": 30,
+  "warmup": 2,
+  "n_images": 64,
+  "per_stage": {
+    "preprocess_per_image": {
+      "n": 30,
+      "mean_ms": 0.8289533322871042,
+      "median_ms": 0.7981000017025508,
+      "p95_ms": 1.0075150014017706,
+      "min_ms": 0.6319999956758693,
+      "max_ms": 1.0539000068092719
+    },
+    "embed_per_image_b1": {
+      "n": 30,
+      "mean_ms": 284.9124100001063,
+      "median_ms": 159.7304000024451,
+      "p95_ms": 210.9858749994599,
+      "min_ms": 151.13430000201333,
+      "max_ms": 3794.994800002314
+    },
+    "score_per_pair": {
+      "n": 30,
+      "mean_ms": 0.031956666498444974,
+      "median_ms": 0.023649998183827847,
+      "p95_ms": 0.0721900054486467,
+      "min_ms": 0.016300007700920105,
+      "max_ms": 0.14770000416319817
+    }
+  },
+  "batch_sweep": [
+    {
+      "batch_size": 1,
+      "runs": 10,
+      "wall_median_ms": 163.3288999873912,
+      "per_image_median_ms": 163.3288999873912,
+      "throughput_img_per_s": 6.122615165333256
+    },
+    {
+      "batch_size": 2,
+      "runs": 10,
+      "wall_median_ms": 184.44320000708103,
+      "per_image_median_ms": 92.22160000354052,
+      "throughput_img_per_s": 10.843446654163543
+    },
+    {
+      "batch_size": 4,
+      "runs": 10,
+      "wall_median_ms": 225.6092999887187,
+      "per_image_median_ms": 56.402324997179676,
+      "throughput_img_per_s": 17.72976557349371
+    },
+    {
+      "batch_size": 8,
+      "runs": 10,
+      "wall_median_ms": 310.04469999606954,
+      "per_image_median_ms": 38.75558749950869,
+      "throughput_img_per_s": 25.802731025885677
+    },
+    {
+      "batch_size": 16,
+      "runs": 10,
+      "wall_median_ms": 473.6749500007136,
+      "per_image_median_ms": 29.6046843750446,
+      "throughput_img_per_s": 33.77843814619265
+    },
+    {
+      "batch_size": 32,
+      "runs": 10,
+      "wall_median_ms": 777.948800001468,
+      "per_image_median_ms": 24.310900000045876,
+      "throughput_img_per_s": 41.133812405057526
+    }
+  ],
+  "end_to_end_per_pair": {
+    "n": 30,
+    "mean_ms": 192.3448666658563,
+    "median_ms": 187.63889999536332,
+    "p95_ms": 234.33631000370949,
+    "min_ms": 173.80449999473058,
+    "max_ms": 262.2657000028994
+  }
+}

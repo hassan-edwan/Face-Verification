@@ -15,8 +15,8 @@ Overlap analysis:
   - Expressed as count and percentage of the smaller version's total pairs
 
 Output:
-  outputs/pairs_comparison.json   — machine-readable summary
-  stdout                          — human-readable report table
+  outputs/pairs_comparison.json   - machine-readable summary
+  stdout                          - human-readable report table
 
 Usage:
     python pairs_comparison.py
@@ -150,7 +150,7 @@ def run_comparison(versions: dict = VERSIONS,
             results[name] = stats
             print(f"  Loaded {name}  ({stats['total_pairs']} pairs)")
         else:
-            print(f"  Skipped {name}  — file not found: {path}")
+            print(f"  Skipped {name}  - file not found: {path}")
 
     if not results:
         print("No CSV files found. Check your configs/ directory.")
@@ -168,7 +168,7 @@ def run_comparison(versions: dict = VERSIONS,
     # Print report
     print_report(results, overlaps)
 
-    # Build serializable output (drop fingerprint sets — not JSON-serializable)
+    # Build serializable output (drop fingerprint sets - not JSON-serializable)
     serializable = {
         name: {k: v for k, v in stats.items() if k != "fingerprints"}
         for name, stats in results.items()

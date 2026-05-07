@@ -1,5 +1,5 @@
 """
-Pair Generator v1 — Baseline
+Pair Generator v1 - Baseline
 =============================
 Generates 500 same-identity and 500 different-identity pairs per split
 using simple random sampling. No deduplication or identity weighting.

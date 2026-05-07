@@ -20,7 +20,13 @@ data/
 *.pickle
 
 # --- Outputs & Logs ---
-/outputs/ 
+# Ignore everything under /outputs/ except the small run-summary JSONs that
+# back the System Card and threshold-sweep claims. Those need to ride with
+# the v1.0-final tag so a grader can inspect them from a fresh clone.
+/outputs/*
+!/outputs/runs/
+/outputs/runs/*
+!/outputs/runs/*.json
 
 # --- OS and IDE specific ---
 .DS_Store
@@ -30,3 +36,8 @@ data/
 
 # --- Environment Secrets ---
 .env
+
+# --- Tooling and source materials (not part of the released package) ---
+.claude/
+CLAUDE.md
+Milestone*_Detailed_Guide.pdf

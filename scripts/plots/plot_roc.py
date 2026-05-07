@@ -1,5 +1,5 @@
 """
-Plot ROC + Threshold Trade-off — All Runs
+Plot ROC + Threshold Trade-off - All Runs
 ==========================================
 Reads every run JSON in outputs/runs/ and saves one analysis PNG per run.
 
@@ -83,7 +83,7 @@ def plot_all_runs():
     for filename in RUN_FILES:
         json_path = os.path.join(RUNS_DIR, filename)
         if not os.path.exists(json_path):
-            print(f"  Skipping {filename} — file not found")
+            print(f"  Skipping {filename} - file not found")
             continue
         run_label = filename.replace(".json", "")
         out_path  = os.path.join(OUT_DIR, f"{run_label}_analysis.png")

@@ -1,5 +1,5 @@
 """
-Run 002 — Uniform Identity Weighting
+Run 002 - Uniform Identity Weighting
 ======================================
 Pairs  : configs/pairs_v2.csv
 Changes: Pair construction updated so same-identity and different-identity

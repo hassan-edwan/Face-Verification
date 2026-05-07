@@ -1,5 +1,5 @@
 """
-Unit Tests — Step 5.10
+Unit Tests - Step 5.10
 ======================
 Run with:  pytest tests/test_unit.py -v
 No dataset, no model, no network required.
@@ -11,7 +11,7 @@ import pandas as pd
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Inline implementations — mirrors scripts so tests stay self-contained
+# Inline implementations - mirrors scripts so tests stay self-contained
 # ═══════════════════════════════════════════════════════════════════════════════
 
 MAX_PAIRS_PER_IDENTITY = 3  # Must match the constant in your generator
@@ -96,10 +96,10 @@ def safe_load_image(path: str):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FIX 1 — Identity Cap Logic
+# FIX 1 - Identity Cap Logic
 #
 # OLD: imported a non-existent module path; asserted counts <= 10 on mocked
-#      data that already violated the cap — always passed, proved nothing.
+#      data that already violated the cap - always passed, proved nothing.
 #
 # NEW: exercises cap_identity_pairs() directly with a known input and verifies
 #      that the output actually respects MAX_PAIRS_PER_IDENTITY.
@@ -113,7 +113,7 @@ class TestIdentityCapEnforcement:
         assert george_count <= MAX_PAIRS_PER_IDENTITY
 
     def test_rare_identity_not_over_dropped(self):
-        # Only 2 pairs — both should survive a cap of 3
+        # Only 2 pairs - both should survive a cap of 3
         pairs = [("Rare_Person", "A", 1), ("Rare_Person", "B", 2)]
         assert len(cap_identity_pairs(pairs, MAX_PAIRS_PER_IDENTITY)) == 2
 
@@ -122,7 +122,7 @@ class TestIdentityCapEnforcement:
         assert cap_identity_pairs(pairs, max_per_identity=0) == []
 
     def test_both_sides_of_pair_consume_cap(self):
-        # Alice appears as left AND right — both count against her cap
+        # Alice appears as left AND right - both count against her cap
         pairs = [
             ("Alice", "Bob",   1),
             ("Carol", "Alice", 2),
@@ -135,9 +135,9 @@ class TestIdentityCapEnforcement:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FIX 2 — Image Loading Robustness
+# FIX 2 - Image Loading Robustness
 #
-# OLD: asserted cv2.imread returns None on a missing path — just tests OpenCV,
+# OLD: asserted cv2.imread returns None on a missing path - just tests OpenCV,
 #      not your pipeline code.
 #
 # NEW: verifies that the safe_load guard keeps downstream code from crashing,
@@ -170,10 +170,10 @@ class TestSafeImageLoading:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FIX 3 — Metric Validation
+# FIX 3 - Metric Validation
 #
 # OLD: hard-coded real run numbers (TP=305, FP=20, FN=9) and asserted f1>0.95
-#      — couples the test to a specific run, breaks if you legitimately get
+#      - couples the test to a specific run, breaks if you legitimately get
 #      different numbers on new data.
 #
 # NEW: tests the calculation formula from known toy inputs, plus one regression

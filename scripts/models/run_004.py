@@ -1,5 +1,5 @@
 """
-Run 004 — Identity Cap
+Run 004 - Identity Cap
 =======================
 Pairs  : configs/pairs_v4.csv
 Changes: Pair construction updated to cap each identity's contribution to

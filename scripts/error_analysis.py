@@ -1,14 +1,14 @@
 """
-Error Analysis — Step 5.8
+Error Analysis - Step 5.8
 ==========================
 Produces two error slices from the val split and saves visual montages
 and CSV exports for report inclusion.
 
-Slice 1 — False Negatives:
+Slice 1 - False Negatives:
     label=1, pred=0. Same-identity pairs the model said were different.
     Sorted ascending by score so the worst misses appear first.
 
-Slice 2 — Boundary False Positives:
+Slice 2 - Boundary False Positives:
     label=0, pred=1, score within BOUNDARY_BAND of the threshold.
     Different-identity pairs the model was nearly certain about but got wrong.
     Sorted descending by score (closest to threshold first).
@@ -64,7 +64,7 @@ def safe_load(path: str) -> np.ndarray:
     """
     img = cv2.imread(path)
     if img is None:
-        print(f"  Warning: could not load {path} — substituting blank image")
+        print(f"  Warning: could not load {path} - substituting blank image")
         return np.zeros((160, 160, 3), dtype=np.uint8)
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -121,8 +121,8 @@ def build_slices(val_df: pd.DataFrame,
     """
     Partitions val_df into the two error slices.
 
-    Slice 1 — False Negatives: label=1, pred=0, sorted ascending by score.
-    Slice 2 — Boundary FPs: label=0, pred=1, score <= threshold + band,
+    Slice 1 - False Negatives: label=1, pred=0, sorted ascending by score.
+    Slice 2 - Boundary FPs: label=0, pred=1, score <= threshold + band,
               sorted descending by score.
     """
     val_df = val_df.copy()
@@ -185,8 +185,8 @@ def run_error_analysis(pairs_csv: str = PAIRS_CSV,
 
     # Slice
     slice1, slice2 = build_slices(val_df, threshold)
-    print(f"\nSlice 1 — False Negatives:          {len(slice1)}")
-    print(f"Slice 2 — Boundary False Positives: {len(slice2)}")
+    print(f"\nSlice 1 - False Negatives:          {len(slice1)}")
+    print(f"Slice 2 - Boundary False Positives: {len(slice2)}")
 
     # Save montages
     build_montage(slice1,

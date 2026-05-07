@@ -1,5 +1,5 @@
 """
-FaceVerifier — embedding-based face verification.
+FaceVerifier - embedding-based face verification.
 
 Wraps the run_005 pipeline (center-crop preprocessing + FaceNet embeddings +
 cosine similarity) behind a small interface that the CLI and load-test share.
@@ -46,7 +46,7 @@ class VerifyResult:
 
 
 def load_and_preprocess(path: str) -> np.ndarray:
-    """Center-crop + resize — same preprocessing as run_005."""
+    """Center-crop + resize - same preprocessing as run_005."""
     img = cv2.imread(path)
     if img is None:
         raise FileNotFoundError(f"Could not read image: {path}")
@@ -66,7 +66,7 @@ class FaceVerifier:
         calibration_path: str = "configs/calibration.json",
         run_json_path: str = "outputs/runs/run_005.json",
     ):
-        from keras_facenet import FaceNet  # lazy — heavy import
+        from keras_facenet import FaceNet  # lazy - heavy import
 
         self._embedder = FaceNet()
 

@@ -1,5 +1,5 @@
 """
-Run 001 — Baseline
+Run 001 - Baseline
 ==================
 Pairs  : configs/pairs.csv
 Changes: Baseline run. No preprocessing, no data-centric improvements.

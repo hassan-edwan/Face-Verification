@@ -1,5 +1,5 @@
 """
-Pair Generator v4 — Identity Cap
+Pair Generator v4 - Identity Cap
 ==================================
 Improvement over v3: each identity may contribute at most
 MAX_PAIRS_PER_IDENTITY pairs across both same and different sets.
@@ -128,7 +128,7 @@ def generate_pairs(lfw_path: str = LFW_PATH,
         print(f"Processing {split_name} split...")
         id_map = build_id_map(lfw_path, ids)
 
-        # Shared cap counter — same + diff pairs both draw from the same budget
+        # Shared cap counter - same + diff pairs both draw from the same budget
         identity_pair_count = {name: 0 for name in id_map}
 
         same_rows = sample_same_pairs(id_map, PAIRS_EACH, rng, identity_pair_count)

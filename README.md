@@ -1,8 +1,28 @@
-# Face Verification — LFW
+# Face Verification - LFW (v1.0-final)
 
-Face verification pipeline using FaceNet embeddings and cosine similarity on LFW.
-Milestone 3 adds an embedding-based verifier packaged behind a CLI and Docker
-image, with Platt-scaled confidence and a local load test.
+A pairwise face verification system built on FaceNet (512-D) embeddings and
+cosine similarity, calibrated on the Labeled Faces in the Wild (LFW) dataset.
+
+The final tagged release packages an embedding-based inference path
+(`src/cli.py` → `src/verifier.py`), a Docker image, a documented operating
+threshold (0.43, F1 = 0.989 on the held-out LFW test split), Platt-scaled
+confidence, a per-stage CPU profile, and a System Card that describes
+intended use, failure modes, and fairness-related risks.
+
+## Final release artifacts
+
+| | Where |
+| --- | --- |
+| **System Card** | [`reports/system_card.md`](reports/system_card.md) |
+| **Profiling report** | [`reports/profiling_report.md`](reports/profiling_report.md) |
+| **Reproducibility checklist** | [`reports/reproducibility_checklist.md`](reports/reproducibility_checklist.md) |
+| **Frozen threshold + Platt calibration** | [`configs/calibration.json`](configs/calibration.json) |
+| **Source evaluation run** | [`outputs/runs/run_005.json`](outputs/runs/run_005.json) |
+| **Auto-generated profiling tables** | [`reports/profiling/latency_summary.md`](reports/profiling/latency_summary.md) |
+| **Final Git tag** | `v1.0-final` |
+
+Operating point (test split, 829 pairs):
+**threshold = 0.43**, TPR 0.988, FPR 0.006, F1 0.989, accuracy 0.992.
 
 ---
 
@@ -68,7 +88,7 @@ pytest tests/ -v
 ## Verify a pair (CLI)
 
 Frozen model: **run_005** (center-crop preprocessing, threshold picked on val).
-Confidence is Platt-scaled on the val split — fit it once with
+Confidence is Platt-scaled on the val split - fit it once with
 `python -m scripts.fit_calibration`.
 
 ```bash
@@ -102,7 +122,7 @@ latency p50/p90/**p95**/p99. Writes a JSON summary if `--output` is given.
 
 | Path | Purpose |
 | --- | --- |
-| `outputs/runs/run_005.json` | Frozen Milestone 2 evaluation — source of threshold |
+| `outputs/runs/run_005.json` | Frozen Milestone 2 evaluation - source of threshold |
 | `configs/calibration.json` | Platt parameters + threshold used by the CLI |
 | `configs/pairs_v4.csv` | Deterministic pair file (train/val/test splits) |
 | `reports/loadtest.json` | Optional load-test summary (if `--output` used) |
@@ -116,8 +136,25 @@ docker run --rm -v "$PWD/data:/data" face-verifier \
     --right /data/lfw/Ana_Guevara/Ana_Guevara_0002.jpg
 ```
 
-`configs/calibration.json` must exist in the tree being built — the image
+`configs/calibration.json` must exist in the tree being built - the image
 bakes it in so the container is self-contained at runtime.
+
+## Profiling (Milestone 4)
+
+Reproduce the CPU latency baseline + batch-size sensitivity:
+
+```bash
+python scripts/profile_pipeline.py --reps 30 --warmup 2 --n-images 64 \
+    --batch-sizes 1 2 4 8 16 32
+```
+
+Writes `reports/profiling/latency_summary.{json,md}`. Full interpretation in
+[`reports/profiling_report.md`](reports/profiling_report.md). End-to-end
+median latency on the reference CPU (Intel i7-1355U) is ~188 ms / pair;
+embed dominates ~99 % of wall time.
+
+The complete copy-pastable reproduction path is in
+[`reports/reproducibility_checklist.md`](reports/reproducibility_checklist.md).
 
 ---
 
@@ -160,18 +197,31 @@ bakes it in so the container is self-contained at runtime.
 │   ├── pairs_comparison.py
 │   ├── bench_similarity.py
 │   ├── fit_calibration.py              # Platt scaling on run_005 val split
-│   └── loadtest.py                     # concurrency + latency percentiles
+│   ├── loadtest.py                     # concurrency + latency percentiles
+│   ├── live_webcam.py                  # 7-stage live demo (Milestone 2 follow-up)
+│   └── profile_pipeline.py             # MILESTONE 4 - per-stage + batch-size profile
 │
 ├── src/
 │   ├── __init__.py
 │   ├── similarity.py                   # cosine_similarity()
 │   ├── verifier.py                     # FaceVerifier (embed → score → decide + confidence)
-│   └── cli.py                          # `python -m src.cli`
+│   ├── cli.py                          # `python -m src.cli`
+│   ├── quality.py                      # FIQA for the live pipeline
+│   ├── tracker.py                      # IoU tracker for the live pipeline
+│   └── gatekeeper.py                   # enrollment state machine for the live pipeline
+│
+├── reports/                            # MILESTONE 4 deliverables
+│   ├── system_card.md
+│   ├── profiling_report.md
+│   ├── reproducibility_checklist.md
+│   └── profiling/
+│       └── latency_summary.{md,json}   # auto-generated profiling tables
 │
 ├── tests/
 │   ├── test_unit.py
 │   ├── test_integration.py
-│   └── test_verifier.py
+│   ├── test_verifier.py
+│   └── test_smoke_cli.py
 │
 ├── Dockerfile
 ├── .dockerignore

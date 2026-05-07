@@ -1,4 +1,4 @@
-# Face verifier — embedding-based CLI.
+# Face verifier - embedding-based CLI.
 #
 # Build:
 #   docker build -t face-verifier .

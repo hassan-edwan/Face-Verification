@@ -8,10 +8,10 @@ Batch (CSV with columns: left_path,right_path,[label]):
     python -m src.cli --pairs pairs.csv
 
 Each verified pair is printed as one JSON line with:
-    decision         — 0 or 1
-    score            — cosine similarity
-    confidence       — Platt-calibrated P(same)
-    latency_ms       — wall time for the pair
+    decision         - 0 or 1
+    score            - cosine similarity
+    confidence       - Platt-calibrated P(same)
+    latency_ms       - wall time for the pair
 
 Exit code is 0 on success, non-zero on I/O or calibration errors.
 """

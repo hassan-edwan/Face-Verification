@@ -33,8 +33,8 @@ BALANCE_THRESHOLD = 0.65
 class ValidationResult:
     """
     Holds the outcome of a single validation check.
-    passed  — True if no errors were found.
-    errors  — list of human-readable problem descriptions.
+    passed  - True if no errors were found.
+    errors  - list of human-readable problem descriptions.
     """
     name:   str
     passed: bool = True
@@ -182,7 +182,7 @@ class PipelineValidator:
             result.fail(f"Invalid JSON: {e}")
             return result
 
-        # ── Sweep key — accept any name used across runs ────────────────────
+        # ── Sweep key - accept any name used across runs ────────────────────
         sweep = data.get("val_sweep") or data.get("sweep")
         if sweep is None:
             result.fail("Missing sweep key (expected 'val_sweep' or 'sweep')")
@@ -196,14 +196,14 @@ class PipelineValidator:
                 if not (0.0 <= entry["threshold"] <= 1.0):
                     result.fail(f"Sweep entry {i} threshold out of [0,1]: {entry['threshold']}")
 
-        # ── Threshold key — accept any name used across runs ─────────────
+        # ── Threshold key - accept any name used across runs ─────────────
         has_threshold = any(k in data for k in (
             "best_threshold_from_val", "best_threshold", "threshold"
         ))
         if not has_threshold:
             result.fail("Missing threshold key (expected 'best_threshold_from_val' or 'best_threshold')")
 
-        # ── Metrics key — accept any name used across runs ────────────────
+        # ── Metrics key - accept any name used across runs ────────────────
         metrics = (data.get("test_metrics") or data.get("best_val_metrics")
                    or data.get("best_metrics"))
         if metrics is None:
